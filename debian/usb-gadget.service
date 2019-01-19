@@ -1,0 +1,11 @@
+[Unit]
+Description=USB Gadget
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/usb-gadget-start.sh
+ExecStop=/usr/bin/usb-gadget-stop.sh
+
+[Install]
+WantedBy=multi-user.target

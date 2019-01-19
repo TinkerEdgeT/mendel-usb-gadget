@@ -1,0 +1,2 @@
+# Prevent advertising as an authoritative DNS server
+dhcp-option=6

@@ -1,0 +1,6 @@
+# Prevent advertising our device as the default gateway.
+#
+# This prevents mis-routing of packets to the device, which causes it to act
+# like a black hole.
+
+dhcp-option=3

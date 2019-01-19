@@ -1,0 +1,13 @@
+Source: usb-gadget
+Section: devel
+Priority: optional
+Maintainer: AIY Team <support-aiyprojects@google.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+Homepage: https://aiyprojects.withgoogle.com/
+
+Package: usb-gadget
+Version: 0.0.1
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, dnsmasq, openssh-server, network-manager
+Description: Sets up USB gadget ethernet and TTY for a given USB port
