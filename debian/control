@@ -1,7 +1,7 @@
 Source: usb-gadget
 Section: devel
 Priority: optional
-Maintainer: AIY Team <support-aiyprojects@google.com>
+Maintainer: AIY Team <coral-support@google.com>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.8
 Homepage: https://aiyprojects.withgoogle.com/
