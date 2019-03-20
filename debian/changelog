@@ -1,4 +1,10 @@
-usb-gadget (0.0.1-1) beaker; urgency=medium
+usb-gadget (1-1) mendel-chef; urgency=medium
+
+  * Cut for chef release
+
+ -- Coral <coral-support@google.com>  Tue, 19 Mar 2019 17:08:25 -0700
+
+usb-gadget (0.0.1-1) mendel-beaker; urgency=medium
 
   * Initial release.
 
