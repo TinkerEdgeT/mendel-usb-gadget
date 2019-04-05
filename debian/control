@@ -1,13 +1,15 @@
 Source: usb-gadget
 Section: devel
 Priority: optional
-Maintainer: AIY Team <coral-support@google.com>
-Build-Depends: debhelper (>= 9)
+Maintainer: Coral <coral-support@google.com>
+Build-Depends: debhelper (>= 10), dh-systemd
 Standards-Version: 3.9.8
-Homepage: https://aiyprojects.withgoogle.com/
+Homepage: https://coral.withgoogle.com/
 
 Package: usb-gadget
-Version: 0.0.1
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, dnsmasq, openssh-server, network-manager
 Description: Sets up USB gadget ethernet and TTY for a given USB port
+ Using sysfs, configures USB gadget to expose a
+ serial console using ACM, and an Ethernet
+ device using ECM.

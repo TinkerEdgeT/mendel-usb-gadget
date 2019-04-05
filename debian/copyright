@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: usb-gadget
-Source: <https://aiyprojects.googlesource.com/>
+Source: https://coral.googlesource.com/
 
 Files: *
 Copyright: Copyright 2018 Google, LLC <coral-support@google.com>

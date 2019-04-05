@@ -50,18 +50,3 @@ else
 fi
 
 nmcli con up id usb0
-
-# Setup the dhcp server and ssh
-
-cat << EOF > /etc/dnsmasq.conf
-# Configuration file for dnsmasq.
-port=0
-interface=usb0
-domain=local
-dhcp-range=192.168.100.50,192.168.100.99,255.255.255.0,12h
-dhcp-lease-max=150
-log-dhcp
-EOF
-
-systemctl restart dnsmasq
-systemctl restart sshd
