@@ -1,52 +1,114 @@
 #!/bin/bash
 
-# Remove the aiy ethernet connection
-nmcli connection delete usb0 || true
+PRODUCT_STRING="Mendel"
+MANUFACTURER_STRING="Google,LLC"
+PRODUCT_ID="0x9303"
+VENDOR_ID="0x18d1"
+USB_VER="0x0200"
+DEV_CLASS="2"
+SERIAL_NUMBER=$(hostname)
+ECM_MAC_ADDR="02:22:78:0d:f6:df"
+RNDIS_DEV_MAC_ADDR="02:22:78:0d:f6:de"
+RNDIS_HOST_MAC_ADDR="02:22:78:0d:f6:dd"
+
+USB_VER="0x0200" # USB 2.0
+DEV_CLASS="2"
+ATTR="0x80" # Bus Powered
+MAX_POWER="500"
+CFG1_NAME="RNDIS"
+CFG2_NAME="CDC"
+
+MS_VENDOR_CODE="0xcd" # Microsoft
+MS_QW_SIGN="MSFT100" # Microsoft
+MS_COMPAT_ID="RNDIS"
+MS_SUBCOMPAT_ID="5162001"
+
+# Remove the mendel ethernet connection
+remove_mendel_connection() {
+	nmcli connection delete "gadget${1}" || true
+}
+remove_mendel_connection 0
+remove_mendel_connection 1
 
 # Setup the USB Gadget device
 CONFIGFS_PATH=/sys/kernel/config
 USB_GADGET_PATH=$CONFIGFS_PATH/usb_gadget
-AIY_GADGET_PATH=$USB_GADGET_PATH/g1
-mkdir -p $AIY_GADGET_PATH
+MENDEL_GADGET_PATH=$USB_GADGET_PATH/g1
+mkdir -p ${MENDEL_GADGET_PATH}
 
-echo 0x0106 > $AIY_GADGET_PATH/idProduct
-echo 0x04e8 > $AIY_GADGET_PATH/idVendor
-mkdir -p $AIY_GADGET_PATH/strings/0x409
-hostname > $AIY_GADGET_PATH/strings/0x409/serialnumber
-echo Google,LLC > $AIY_GADGET_PATH/strings/0x409/manufacturer
-echo "Mendel" > $AIY_GADGET_PATH/strings/0x409/product
+echo "${USB_VER}" > ${MENDEL_GADGET_PATH}/bcdUSB
+echo "${DEV_CLASS}" > ${MENDEL_GADGET_PATH}/bDeviceClass
+echo "${PRODUCT_ID}" > ${MENDEL_GADGET_PATH}/idProduct
+echo "${VENDOR_ID}" > ${MENDEL_GADGET_PATH}/idVendor
+mkdir -p ${MENDEL_GADGET_PATH}/strings/0x409
+echo "${SERIAL_NUMBER}" > ${MENDEL_GADGET_PATH}/strings/0x409/serialnumber
+echo "${MANUFACTURER_STRING}" > ${MENDEL_GADGET_PATH}/strings/0x409/manufacturer
+echo "${PRODUCT_STRING}" > ${MENDEL_GADGET_PATH}/strings/0x409/product
 
-mkdir -p $AIY_GADGET_PATH/configs/c.1
-echo 500 > $AIY_GADGET_PATH/configs/c.1/MaxPower
-mkdir -p $AIY_GADGET_PATH/configs/c.1/strings/0x409
-echo "Conf 1" > $AIY_GADGET_PATH/configs/c.1/strings/0x409/configuration
+# Create Config 1 for CDC
+MENDEL_CONFIG1_PATH="${MENDEL_GADGET_PATH}/configs/c.1"
+mkdir -p "${MENDEL_CONFIG1_PATH}"
+echo "${ATTR}" > "${MENDEL_CONFIG1_PATH}/bmAttributes"
+echo "${MAX_POWER}" > ${MENDEL_CONFIG1_PATH}/MaxPower
+mkdir -p ${MENDEL_CONFIG1_PATH}/strings/0x409
+echo "${CFG1_NAME}" > ${MENDEL_CONFIG1_PATH}/strings/0x409/configuration
 
-mkdir $AIY_GADGET_PATH/functions/acm.0
-ln -s  $AIY_GADGET_PATH/functions/acm.0 $AIY_GADGET_PATH/configs/c.1
+# Create Config 2 for RNDIS
+MENDEL_CONFIG2_PATH="${MENDEL_GADGET_PATH}/configs/c.2"
+mkdir -p "${MENDEL_CONFIG2_PATH}"
+echo "${ATTR}" > "${MENDEL_CONFIG2_PATH}/bmAttributes"
+echo "${MAX_POWER}" > ${MENDEL_CONFIG2_PATH}/MaxPower
+mkdir -p ${MENDEL_CONFIG2_PATH}/strings/0x409
+echo "${CFG2_NAME}" > ${MENDEL_CONFIG2_PATH}/strings/0x409/configuration
 
-mkdir $AIY_GADGET_PATH/functions/ecm.0
-ln -s $AIY_GADGET_PATH/functions/ecm.0 $AIY_GADGET_PATH/configs/c.1
-echo "02:22:78:0d:f6:df" > $AIY_GADGET_PATH/functions/ecm.0/dev_addr
+# Windows Specific Configuration
+echo "1" > "${MENDEL_GADGET_PATH}/os_desc/use"
+echo "${MS_VENDOR_CODE}" > "${MENDEL_GADGET_PATH}/os_desc/b_vendor_code"
+echo "${MS_QW_SIGN}" > "${MENDEL_GADGET_PATH}/os_desc/qw_sign"
+
+# Create RNDIS Function
+FUNCTION_RNDIS0="${MENDEL_GADGET_PATH}/functions/rndis.0"
+mkdir "${FUNCTION_RNDIS0}"
+echo "${RNDIS_DEV_MAC_ADDR}" > "${FUNCTION_RNDIS0}/dev_addr"
+echo "${RNDIS_HOST_MAC_ADDR}" > "${FUNCTION_RNDIS0}/host_addr"
+echo "${MS_COMPAT_ID}" > "${FUNCTION_RNDIS0}/os_desc/interface.rndis/compatible_id"
+echo "${MS_SUBCOMPAT_ID}" > "${FUNCTION_RNDIS0}/os_desc/interface.rndis/sub_compatible_id"
+echo "RNDIS" > "${FUNCTION_RNDIS0}/os_desc/interface.rndis/compatible_id"
+
+FUNCTION_ACM0="${MENDEL_GADGET_PATH}/functions/acm.0"
+mkdir "${FUNCTION_ACM0}"
+
+# Create the ECM0 Function
+FUNCTION_ECM0="${MENDEL_GADGET_PATH}/functions/ecm.0"
+mkdir "${FUNCTION_ECM0}"
+echo "${ECM_MAC_ADDR}" > "${FUNCTION_ECM0}/dev_addr"
+find ${FUNCTION_ECM0}
+
+
+ln -s "${FUNCTION_RNDIS0}" "${MENDEL_CONFIG2_PATH}"
+ln -s "${FUNCTION_ACM0}" "${MENDEL_CONFIG1_PATH}"
+ln -s "${FUNCTION_ACM0}" "${MENDEL_CONFIG2_PATH}"
+ln -s "${FUNCTION_ECM0}" "${MENDEL_CONFIG1_PATH}"
+ln -s "${MENDEL_CONFIG2_PATH}" "${MENDEL_GADGET_PATH}/os_desc"
 
 UDC=$(echo -n $(ls /sys/class/udc/|head -c -1 -n 1))
 echo $UDC
-
 sleep 1
-echo $UDC > $AIY_GADGET_PATH/UDC
-
-# Setup the ttyGS0 terminal
-systemctl enable usb-gadget-getty@ttyGS0.service
-systemctl start usb-gadget-getty@ttyGS0.service
-
-sleep 3
+echo $UDC > "${MENDEL_GADGET_PATH}/UDC"
 
 # Set a static ip for the gadget ethernet
-$(nmcli con show | grep -q usb0)
-aiy_conn_exist=$?
-if [[ "$aiy_conn_exist" -eq 0 ]]; then
-  echo "usb0 connection already exists"
-else
-  nmcli con add con-name usb0 ifname usb0 type ethernet ip4 192.168.100.2/24
-fi
+configure_network() {
+	GADGET_CON_NAME="gadget${1}"
+	INTERFACE_NAME="usb${1}"
+	$(nmcli con show | grep -q "${GADGET_CON_NAME}")
+	mendel_conn_exist=$?
+	if [[ "$mendel_conn_exist" -eq 0 ]]; then
+	  echo "${GADGET_CON_NAME} connection already exists"
+	else
+	  nmcli con add con-name "${GADGET_CON_NAME}" ifname "${INTERFACE_NAME}" type ethernet ip4 "192.168.10${1}.2/24"
+	fi
+	nmcli con up id "${GADGET_CON_NAME}"
+}
 
-nmcli con up id usb0
+configure_network 0
+configure_network 1

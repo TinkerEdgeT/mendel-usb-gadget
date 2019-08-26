@@ -1,7 +1,9 @@
 # Configuration file for dnsmasq.
 port=0
 interface=usb0
+interface=usb1
 domain=local
-dhcp-range=192.168.100.50,192.168.100.99,255.255.255.0,12h
+dhcp-range=usb0,192.168.100.50,192.168.100.99,255.255.255.0,12h
+dhcp-range=usb1,192.168.101.50,192.168.101.99,255.255.255.0,12h
 dhcp-lease-max=150
 log-dhcp
