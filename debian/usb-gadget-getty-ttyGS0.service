@@ -31,7 +31,7 @@ ConditionPathExists=/dev/ttyGS0
 [Service]
 # the VT is cleared by TTYVTDisallocate
 ExecStartPre=/bin/sleep 10
-ExecStart=-/sbin/agetty -8 -c --timeout 10 -w --noclear ttyGS0 $TERM
+ExecStart=-/sbin/agetty -8 -c -w --noclear ttyGS0 $TERM
 Type=idle
 Restart=always
 RestartSec=0
