@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Coral <coral-support@google.com>
 Build-Depends: debhelper (>= 10)
 Standards-Version: 3.9.8
-Homepage: https://coral.withgoogle.com/
+Homepage: https://coral.ai/
 
 Package: usb-gadget
 Architecture: all
