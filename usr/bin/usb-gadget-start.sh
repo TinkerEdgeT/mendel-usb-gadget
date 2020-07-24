@@ -1,8 +1,17 @@
 #!/bin/bash
 
+KERNEL_VERSION="$(uname -r)"
+if [[ "${KERNEL_VERSION}" =~ imx ]]; then
+  PRODUCT_ID="0x9303"
+elif [[ "${KERNEL_VERSION}" =~ mtk ]]; then
+  PRODUCT_ID="0x9304"
+else
+  echo "Unknown device, not setting up gadget."
+  exit 1
+fi
+
 PRODUCT_STRING="Mendel"
 MANUFACTURER_STRING="Google,LLC"
-PRODUCT_ID="0x9303"
 VENDOR_ID="0x18d1"
 USB_VER="0x0200"
 DEV_CLASS="2"
